@@ -1,0 +1,129 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "golang-project.local/proto";
+
+// StreamService defines the gRPC service for streaming system metrics
+service StreamService {
+  // StreamMetrics streams system metrics to connected clients
+  rpc StreamMetrics(MetricRequest) returns (stream SystemMetrics) {}
+}
+
+// MetricRequest contains the client's configuration for metric streaming
+message MetricRequest {
+  int32 interval_seconds = 1;  // N: collection interval in seconds
+  int32 window_seconds = 2;    // M: aggregation window in seconds
+}
+
+// SystemMetrics is the top-level message containing all metric categories
+message SystemMetrics {
+  uint64 timestamp = 1;                    // Unix timestamp in nanoseconds
+  int32 interval_seconds = 2;              // N: the collection interval used
+  int32 window_seconds = 3;                // M: the aggregation window used
+  LoadMetrics load = 4;                    // System load average
+  CpuMetrics cpu = 5;                      // CPU usage metrics
+  DiskIOMetrics disk_io = 6;               // Disk I/O metrics
+  // FilesystemMetrics filesystem = 7;        // Filesystem usage metrics
+  NetworkMetrics network = 8;              // Network connection statistics
+  TopTalkers top_talkers = 9;              // Network top talkers
+}
+
+// LoadMetrics represents system load average
+message LoadMetrics {
+  double load1 = 1;   // Load average over 1 minute
+  // double load5 = 2;   // Load average over 5 minutes
+  // double load15 = 3;  // Load average over 15 minutes
+}
+
+// CpuMetrics represents CPU usage percentages
+message CpuMetrics {
+  double percent_user = 1;   // % user time
+  double percent_system = 2; // % system time
+  double percent_idle = 3;   // % idle time
+  // double percent_iowait = 4; // % I/O wait time (Linux only)
+  // double percent_irq = 5;    // % IRQ time (Linux only)
+  // double percent_steal = 6;  // % steal time (virtualized environments)
+}
+
+// DiskIOMetrics represents disk I/O statistics
+message DiskIOMetrics {
+  double tps = 1;              // Transactions per second
+  // double kb_read_per_sec = 2;  // KB/s read
+  // double kb_write_per_sec = 3; // KB/s write
+  double kb_total_per_sec = 4; // Total KB/s
+  // repeated DiskDeviceMetrics devices = 5; // Per-device metrics
+}
+
+// DiskDeviceMetrics represents I/O statistics for a single disk device
+// message DiskDeviceMetrics {
+//   string device_name = 1;      // Device name (e.g., sda, nvme0n1)
+//   double tps = 2;              // Transactions per second
+//   double kb_read_per_sec = 3;  // KB/s read
+//   double kb_write_per_sec = 4; // KB/s write
+// }
+
+// FilesystemMetrics represents filesystem usage statistics
+// message FilesystemMetrics {
+//   repeated FilesystemUsage mounts = 1; // Per-mount-point metrics
+// }
+
+// FilesystemUsage represents usage for a single mount point
+message FilesystemUsage {
+  string mount_point = 1;      // Mount point path
+  string filesystem = 2;       // Filesystem device
+  // string type = 3;             // Filesystem type (ext4, xfs, etc.)
+  // double mb_total = 4;         // Total size in MB
+  // double mb_used = 5;          // Used space in MB
+  // double mb_available = 6;     // Available space in MB
+  double percent_used = 7;     // Usage percentage
+  double inode_percent = 8;    // Inode usage percentage
+}
+
+// NetworkMetrics represents network connection statistics
+message NetworkMetrics {
+  int32 listening_sockets = 1;     // Number of listening TCP sockets
+  int32 established_connections = 2; // Number of established TCP connections
+  int32 time_wait_sockets = 3;     // Number of TIME_WAIT sockets
+  int32 close_wait_sockets = 4;    // Number of CLOSE_WAIT sockets
+  int32 fin_wait_sockets = 5;      // Number of FIN_WAIT sockets
+  int32 syn_sent_sockets = 6;      // Number of SYN_SENT sockets
+  int32 udp_sockets = 7;           // Number of UDP sockets
+  repeated ConnectionStat connections = 8; // Detailed connection list
+}
+
+// ConnectionStat represents a single network connection
+message ConnectionStat {
+  string protocol = 1;       // Protocol (tcp, tcp6, udp, udp6)
+  string local_address = 2;  // Local address:port
+  string remote_address = 3; // Remote address:port
+  string state = 4;          // Connection state (LISTEN, ESTABLISHED, etc.)
+  uint32 pid = 5;            // Process ID (0 if not available)
+  string process_name = 6;   // Process name (empty if not available)
+}
+
+// TopTalkers represents network traffic by protocol and connection
+message TopTalkers {
+  repeated ProtocolTraffic by_protocol = 1;     // Traffic grouped by protocol
+  repeated ConnectionTraffic by_connection = 2; // Traffic grouped by connection
+}
+
+// ProtocolTraffic represents traffic statistics for a protocol
+message ProtocolTraffic {
+  string protocol = 1;       // Protocol name (tcp, udp, etc.)
+  int64 bytes_sent = 2;      // Bytes sent in window
+  int64 bytes_received = 3;  // Bytes received in window
+  int64 packets_sent = 4;    // Packets sent in window
+  int64 packets_received = 5;// Packets received in window
+}
+
+// ConnectionTraffic represents traffic for a specific connection
+message ConnectionTraffic {
+  string protocol = 1;       // Protocol (tcp, udp)
+  string local_address = 2;  // Local address:port
+  string remote_address = 3; // Remote address:port
+  int64 bytes_sent = 4;      // Bytes sent in window
+  int64 bytes_received = 5;  // Bytes received in window
+  int64 packets_sent = 6;    // Packets sent in window
+  int64 packets_received = 7;// Packets received in window
+}
