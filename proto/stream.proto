@@ -24,7 +24,7 @@ message SystemMetrics {
   LoadMetrics load = 4;                    // System load average
   CpuMetrics cpu = 5;                      // CPU usage metrics
   DiskIOMetrics disk_io = 6;               // Disk I/O metrics
-  // FilesystemMetrics filesystem = 7;        // Filesystem usage metrics
+  FilesystemUsage filesystem = 7;          // Filesystem usage metrics
   NetworkMetrics network = 8;              // Network connection statistics
   TopTalkers top_talkers = 9;              // Network top talkers
 }

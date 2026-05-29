@@ -83,11 +83,11 @@ type SystemMetrics struct {
 	Load            *LoadMetrics           `protobuf:"bytes,4,opt,name=load,proto3" json:"load,omitempty"`                                               // System load average
 	Cpu             *CpuMetrics            `protobuf:"bytes,5,opt,name=cpu,proto3" json:"cpu,omitempty"`                                                 // CPU usage metrics
 	DiskIo          *DiskIOMetrics         `protobuf:"bytes,6,opt,name=disk_io,json=diskIo,proto3" json:"disk_io,omitempty"`                             // Disk I/O metrics
-	// FilesystemMetrics filesystem = 7;        // Filesystem usage metrics
-	Network       *NetworkMetrics `protobuf:"bytes,8,opt,name=network,proto3" json:"network,omitempty"`                         // Network connection statistics
-	TopTalkers    *TopTalkers     `protobuf:"bytes,9,opt,name=top_talkers,json=topTalkers,proto3" json:"top_talkers,omitempty"` // Network top talkers
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Filesystem      *FilesystemUsage       `protobuf:"bytes,7,opt,name=filesystem,proto3" json:"filesystem,omitempty"`                                   // Filesystem usage metrics
+	Network         *NetworkMetrics        `protobuf:"bytes,8,opt,name=network,proto3" json:"network,omitempty"`                                         // Network connection statistics
+	TopTalkers      *TopTalkers            `protobuf:"bytes,9,opt,name=top_talkers,json=topTalkers,proto3" json:"top_talkers,omitempty"`                 // Network top talkers
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *SystemMetrics) Reset() {
@@ -158,6 +158,13 @@ func (x *SystemMetrics) GetCpu() *CpuMetrics {
 func (x *SystemMetrics) GetDiskIo() *DiskIOMetrics {
 	if x != nil {
 		return x.DiskIo
+	}
+	return nil
+}
+
+func (x *SystemMetrics) GetFilesystem() *FilesystemUsage {
+	if x != nil {
+		return x.Filesystem
 	}
 	return nil
 }
@@ -826,14 +833,17 @@ const file_proto_stream_proto_rawDesc = "" +
 	"\x12proto/stream.proto\x12\x05proto\"a\n" +
 	"\rMetricRequest\x12)\n" +
 	"\x10interval_seconds\x18\x01 \x01(\x05R\x0fintervalSeconds\x12%\n" +
-	"\x0ewindow_seconds\x18\x02 \x01(\x05R\rwindowSeconds\"\xe0\x02\n" +
+	"\x0ewindow_seconds\x18\x02 \x01(\x05R\rwindowSeconds\"\x98\x03\n" +
 	"\rSystemMetrics\x12\x1c\n" +
 	"\ttimestamp\x18\x01 \x01(\x04R\ttimestamp\x12)\n" +
 	"\x10interval_seconds\x18\x02 \x01(\x05R\x0fintervalSeconds\x12%\n" +
 	"\x0ewindow_seconds\x18\x03 \x01(\x05R\rwindowSeconds\x12&\n" +
 	"\x04load\x18\x04 \x01(\v2\x12.proto.LoadMetricsR\x04load\x12#\n" +
 	"\x03cpu\x18\x05 \x01(\v2\x11.proto.CpuMetricsR\x03cpu\x12-\n" +
-	"\adisk_io\x18\x06 \x01(\v2\x14.proto.DiskIOMetricsR\x06diskIo\x12/\n" +
+	"\adisk_io\x18\x06 \x01(\v2\x14.proto.DiskIOMetricsR\x06diskIo\x126\n" +
+	"\n" +
+	"filesystem\x18\a \x01(\v2\x16.proto.FilesystemUsageR\n" +
+	"filesystem\x12/\n" +
 	"\anetwork\x18\b \x01(\v2\x15.proto.NetworkMetricsR\anetwork\x122\n" +
 	"\vtop_talkers\x18\t \x01(\v2\x11.proto.TopTalkersR\n" +
 	"topTalkers\"#\n" +
@@ -926,18 +936,19 @@ var file_proto_stream_proto_depIdxs = []int32{
 	2,  // 0: proto.SystemMetrics.load:type_name -> proto.LoadMetrics
 	3,  // 1: proto.SystemMetrics.cpu:type_name -> proto.CpuMetrics
 	4,  // 2: proto.SystemMetrics.disk_io:type_name -> proto.DiskIOMetrics
-	6,  // 3: proto.SystemMetrics.network:type_name -> proto.NetworkMetrics
-	8,  // 4: proto.SystemMetrics.top_talkers:type_name -> proto.TopTalkers
-	7,  // 5: proto.NetworkMetrics.connections:type_name -> proto.ConnectionStat
-	9,  // 6: proto.TopTalkers.by_protocol:type_name -> proto.ProtocolTraffic
-	10, // 7: proto.TopTalkers.by_connection:type_name -> proto.ConnectionTraffic
-	0,  // 8: proto.StreamService.StreamMetrics:input_type -> proto.MetricRequest
-	1,  // 9: proto.StreamService.StreamMetrics:output_type -> proto.SystemMetrics
-	9,  // [9:10] is the sub-list for method output_type
-	8,  // [8:9] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	5,  // 3: proto.SystemMetrics.filesystem:type_name -> proto.FilesystemUsage
+	6,  // 4: proto.SystemMetrics.network:type_name -> proto.NetworkMetrics
+	8,  // 5: proto.SystemMetrics.top_talkers:type_name -> proto.TopTalkers
+	7,  // 6: proto.NetworkMetrics.connections:type_name -> proto.ConnectionStat
+	9,  // 7: proto.TopTalkers.by_protocol:type_name -> proto.ProtocolTraffic
+	10, // 8: proto.TopTalkers.by_connection:type_name -> proto.ConnectionTraffic
+	0,  // 9: proto.StreamService.StreamMetrics:input_type -> proto.MetricRequest
+	1,  // 10: proto.StreamService.StreamMetrics:output_type -> proto.SystemMetrics
+	10, // [10:11] is the sub-list for method output_type
+	9,  // [9:10] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_proto_stream_proto_init() }

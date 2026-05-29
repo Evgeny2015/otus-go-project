@@ -1,6 +1,6 @@
 // Package collector provides platform-specific system metric collectors
-// that execute shell commands and parse their output to fill LoadMetric
-// and CpuMetric structures.
+// that execute shell commands and parse their output to fill LoadMetric,
+// CpuMetric, and DiskIOMetric structures.
 package collector
 
 import (
@@ -126,6 +126,124 @@ func collectCPU(ctx context.Context) (*pb.CpuMetrics, error) {
 		return collectCPUDarwin(ctx)
 	case "windows":
 		return collectCPUWindows(ctx)
+	default:
+		return nil, fmt.Errorf("unsupported platform: %s", runtime.GOOS)
+	}
+}
+
+// DiskIOMetric wraps proto.DiskIOMetrics to implement buffer.Metric
+type DiskIOMetric struct {
+	ts      time.Time
+	Metrics *pb.DiskIOMetrics
+}
+
+func (m *DiskIOMetric) Timestamp() time.Time {
+	return m.ts
+}
+
+func (m *DiskIOMetric) Value() interface{} {
+	return m.Metrics
+}
+
+// DiskIOCollector collects disk I/O metrics.
+type DiskIOCollector struct {
+	enabled bool
+}
+
+// NewDiskIOCollector creates a new DiskIOCollector.
+func NewDiskIOCollector() *DiskIOCollector {
+	return &DiskIOCollector{enabled: true}
+}
+
+// Name returns the collector name.
+func (c *DiskIOCollector) Name() string {
+	return "diskio"
+}
+
+// Enabled returns whether the collector is enabled.
+func (c *DiskIOCollector) Enabled() bool {
+	return c.enabled
+}
+
+// Collect collects disk I/O metrics using the platform-specific command.
+func (c *DiskIOCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+	diskio, err := collectDiskIO(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("disk I/O collection failed: %w", err)
+	}
+	return &DiskIOMetric{
+		Metrics: diskio,
+	}, nil
+}
+
+// collectDiskIO dispatches to the platform-specific implementation.
+func collectDiskIO(ctx context.Context) (*pb.DiskIOMetrics, error) {
+	switch runtime.GOOS {
+	case "linux":
+		return collectDiskIOLinux(ctx)
+	case "darwin":
+		return collectDiskIODarwin(ctx)
+	case "windows":
+		return collectDiskIOWindows(ctx)
+	default:
+		return nil, fmt.Errorf("unsupported platform: %s", runtime.GOOS)
+	}
+}
+
+// FilesystemUsageMetric wraps proto.FilesystemUsage to implement buffer.Metric
+type FilesystemUsageMetric struct {
+	ts      time.Time
+	Metrics *pb.FilesystemUsage
+}
+
+func (m *FilesystemUsageMetric) Timestamp() time.Time {
+	return m.ts
+}
+
+func (m *FilesystemUsageMetric) Value() interface{} {
+	return m.Metrics
+}
+
+// FilesystemUsageCollector collects filesystem usage metrics.
+type FilesystemUsageCollector struct {
+	enabled bool
+}
+
+// NewFilesystemUsageCollector creates a new FilesystemUsageCollector.
+func NewFilesystemUsageCollector() *FilesystemUsageCollector {
+	return &FilesystemUsageCollector{enabled: true}
+}
+
+// Name returns the collector name.
+func (c *FilesystemUsageCollector) Name() string {
+	return "filesystem"
+}
+
+// Enabled returns whether the collector is enabled.
+func (c *FilesystemUsageCollector) Enabled() bool {
+	return c.enabled
+}
+
+// Collect collects filesystem usage metrics using the platform-specific command.
+func (c *FilesystemUsageCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+	fs, err := collectFilesystemUsage(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("filesystem usage collection failed: %w", err)
+	}
+	return &FilesystemUsageMetric{
+		Metrics: fs,
+	}, nil
+}
+
+// collectFilesystemUsage dispatches to the platform-specific implementation.
+func collectFilesystemUsage(ctx context.Context) (*pb.FilesystemUsage, error) {
+	switch runtime.GOOS {
+	case "linux":
+		return collectFilesystemUsageLinux(ctx)
+	case "darwin":
+		return collectFilesystemUsageDarwin(ctx)
+	case "windows":
+		return collectFilesystemUsageWindows(ctx)
 	default:
 		return nil, fmt.Errorf("unsupported platform: %s", runtime.GOOS)
 	}
