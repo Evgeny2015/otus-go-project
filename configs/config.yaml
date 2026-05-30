@@ -1,0 +1,36 @@
+# System Monitoring Daemon Configuration
+#
+# This file controls which subsystems are monitored and how metrics
+# are collected and streamed to clients.
+#
+# Configuration is loaded in this order (later overrides earlier):
+#   1. Built-in defaults
+#   2. This YAML config file
+#   3. Command-line flags
+#   4. Environment variables (MON_GRPC_PORT, MON_INTERVAL, etc.)
+
+monitoring:
+  # List of enabled metric collectors.
+  # Valid values: cpu, disk, network, filesystem, load, toptalkers
+  enabled_collectors:
+    - cpu
+    - disk
+    - network
+    - filesystem
+    - load
+
+  # default_interval (N): seconds between metric broadcasts to clients.
+  # Clients may override this in their StreamMetrics request.
+  default_interval: 5
+
+  # default_window (M): seconds for the sliding window aggregation.
+  # Clients may override this in their StreamMetrics request.
+  default_window: 15
+
+server:
+  # grpc_port: TCP port for the gRPC server.
+  grpc_port: 50051
+
+  # max_clients: maximum number of concurrent gRPC clients.
+  # Set to 0 for unlimited.
+  max_clients: 100
