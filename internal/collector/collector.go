@@ -248,3 +248,129 @@ func collectFilesystemUsage(ctx context.Context) (*pb.FilesystemUsage, error) {
 		return nil, fmt.Errorf("unsupported platform: %s", runtime.GOOS)
 	}
 }
+
+// ---------------------------------------------------------------------------
+// NetworkMetrics
+// ---------------------------------------------------------------------------
+
+// NetworkMetric wraps proto.NetworkMetrics to implement buffer.Metric
+type NetworkMetric struct {
+	ts      time.Time
+	Metrics *pb.NetworkMetrics
+}
+
+func (m *NetworkMetric) Timestamp() time.Time {
+	return m.ts
+}
+
+func (m *NetworkMetric) Value() interface{} {
+	return m.Metrics
+}
+
+// NetworkCollector collects network connection statistics.
+type NetworkCollector struct {
+	enabled bool
+}
+
+// NewNetworkCollector creates a new NetworkCollector.
+func NewNetworkCollector() *NetworkCollector {
+	return &NetworkCollector{enabled: true}
+}
+
+// Name returns the collector name.
+func (c *NetworkCollector) Name() string {
+	return "network"
+}
+
+// Enabled returns whether the collector is enabled.
+func (c *NetworkCollector) Enabled() bool {
+	return c.enabled
+}
+
+// Collect collects network metrics using the platform-specific command.
+func (c *NetworkCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+	net, err := collectNetworkMetrics(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("network metrics collection failed: %w", err)
+	}
+	return &NetworkMetric{
+		Metrics: net,
+	}, nil
+}
+
+// collectNetworkMetrics dispatches to the platform-specific implementation.
+func collectNetworkMetrics(ctx context.Context) (*pb.NetworkMetrics, error) {
+	switch runtime.GOOS {
+	case "linux":
+		return collectNetworkMetricsLinux(ctx)
+	case "darwin":
+		return collectNetworkMetricsDarwin(ctx)
+	case "windows":
+		return collectNetworkMetricsWindows(ctx)
+	default:
+		return nil, fmt.Errorf("unsupported platform: %s", runtime.GOOS)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// TopTalkers
+// ---------------------------------------------------------------------------
+
+// TopTalkersMetric wraps proto.TopTalkers to implement buffer.Metric
+type TopTalkersMetric struct {
+	ts      time.Time
+	Metrics *pb.TopTalkers
+}
+
+func (m *TopTalkersMetric) Timestamp() time.Time {
+	return m.ts
+}
+
+func (m *TopTalkersMetric) Value() interface{} {
+	return m.Metrics
+}
+
+// TopTalkersCollector collects network top talkers data.
+type TopTalkersCollector struct {
+	enabled bool
+}
+
+// NewTopTalkersCollector creates a new TopTalkersCollector.
+func NewTopTalkersCollector() *TopTalkersCollector {
+	return &TopTalkersCollector{enabled: true}
+}
+
+// Name returns the collector name.
+func (c *TopTalkersCollector) Name() string {
+	return "toptalkers"
+}
+
+// Enabled returns whether the collector is enabled.
+func (c *TopTalkersCollector) Enabled() bool {
+	return c.enabled
+}
+
+// Collect collects top talkers data using the platform-specific command.
+func (c *TopTalkersCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+	tt, err := collectTopTalkers(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("top talkers collection failed: %w", err)
+	}
+	return &TopTalkersMetric{
+		Metrics: tt,
+	}, nil
+}
+
+// collectTopTalkers dispatches to the platform-specific implementation.
+func collectTopTalkers(ctx context.Context) (*pb.TopTalkers, error) {
+	switch runtime.GOOS {
+	case "linux":
+		return collectTopTalkersLinux(ctx)
+	case "darwin":
+		return collectTopTalkersDarwin(ctx)
+	case "windows":
+		return collectTopTalkersWindows(ctx)
+	default:
+		return nil, fmt.Errorf("unsupported platform: %s", runtime.GOOS)
+	}
+}

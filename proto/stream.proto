@@ -89,7 +89,7 @@ message NetworkMetrics {
   int32 fin_wait_sockets = 5;      // Number of FIN_WAIT sockets
   int32 syn_sent_sockets = 6;      // Number of SYN_SENT sockets
   int32 udp_sockets = 7;           // Number of UDP sockets
-  repeated ConnectionStat connections = 8; // Detailed connection list
+  // repeated ConnectionStat connections = 8; // Detailed connection list
 }
 
 // ConnectionStat represents a single network connection

@@ -427,7 +427,6 @@ type NetworkMetrics struct {
 	FinWaitSockets         int32                  `protobuf:"varint,5,opt,name=fin_wait_sockets,json=finWaitSockets,proto3" json:"fin_wait_sockets,omitempty"`                       // Number of FIN_WAIT sockets
 	SynSentSockets         int32                  `protobuf:"varint,6,opt,name=syn_sent_sockets,json=synSentSockets,proto3" json:"syn_sent_sockets,omitempty"`                       // Number of SYN_SENT sockets
 	UdpSockets             int32                  `protobuf:"varint,7,opt,name=udp_sockets,json=udpSockets,proto3" json:"udp_sockets,omitempty"`                                     // Number of UDP sockets
-	Connections            []*ConnectionStat      `protobuf:"bytes,8,rep,name=connections,proto3" json:"connections,omitempty"`                                                      // Detailed connection list
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -509,13 +508,6 @@ func (x *NetworkMetrics) GetUdpSockets() int32 {
 		return x.UdpSockets
 	}
 	return 0
-}
-
-func (x *NetworkMetrics) GetConnections() []*ConnectionStat {
-	if x != nil {
-		return x.Connections
-	}
-	return nil
 }
 
 // ConnectionStat represents a single network connection
@@ -864,7 +856,7 @@ const file_proto_stream_proto_rawDesc = "" +
 	"filesystem\x18\x02 \x01(\tR\n" +
 	"filesystem\x12!\n" +
 	"\fpercent_used\x18\a \x01(\x01R\vpercentUsed\x12#\n" +
-	"\rinode_percent\x18\b \x01(\x01R\finodePercent\"\xfe\x02\n" +
+	"\rinode_percent\x18\b \x01(\x01R\finodePercent\"\xc5\x02\n" +
 	"\x0eNetworkMetrics\x12+\n" +
 	"\x11listening_sockets\x18\x01 \x01(\x05R\x10listeningSockets\x127\n" +
 	"\x17established_connections\x18\x02 \x01(\x05R\x16establishedConnections\x12*\n" +
@@ -873,8 +865,7 @@ const file_proto_stream_proto_rawDesc = "" +
 	"\x10fin_wait_sockets\x18\x05 \x01(\x05R\x0efinWaitSockets\x12(\n" +
 	"\x10syn_sent_sockets\x18\x06 \x01(\x05R\x0esynSentSockets\x12\x1f\n" +
 	"\vudp_sockets\x18\a \x01(\x05R\n" +
-	"udpSockets\x127\n" +
-	"\vconnections\x18\b \x03(\v2\x15.proto.ConnectionStatR\vconnections\"\xc3\x01\n" +
+	"udpSockets\"\xc3\x01\n" +
 	"\x0eConnectionStat\x12\x1a\n" +
 	"\bprotocol\x18\x01 \x01(\tR\bprotocol\x12#\n" +
 	"\rlocal_address\x18\x02 \x01(\tR\flocalAddress\x12%\n" +
@@ -939,16 +930,15 @@ var file_proto_stream_proto_depIdxs = []int32{
 	5,  // 3: proto.SystemMetrics.filesystem:type_name -> proto.FilesystemUsage
 	6,  // 4: proto.SystemMetrics.network:type_name -> proto.NetworkMetrics
 	8,  // 5: proto.SystemMetrics.top_talkers:type_name -> proto.TopTalkers
-	7,  // 6: proto.NetworkMetrics.connections:type_name -> proto.ConnectionStat
-	9,  // 7: proto.TopTalkers.by_protocol:type_name -> proto.ProtocolTraffic
-	10, // 8: proto.TopTalkers.by_connection:type_name -> proto.ConnectionTraffic
-	0,  // 9: proto.StreamService.StreamMetrics:input_type -> proto.MetricRequest
-	1,  // 10: proto.StreamService.StreamMetrics:output_type -> proto.SystemMetrics
-	10, // [10:11] is the sub-list for method output_type
-	9,  // [9:10] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	9,  // 6: proto.TopTalkers.by_protocol:type_name -> proto.ProtocolTraffic
+	10, // 7: proto.TopTalkers.by_connection:type_name -> proto.ConnectionTraffic
+	0,  // 8: proto.StreamService.StreamMetrics:input_type -> proto.MetricRequest
+	1,  // 9: proto.StreamService.StreamMetrics:output_type -> proto.SystemMetrics
+	9,  // [9:10] is the sub-list for method output_type
+	8,  // [8:9] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_proto_stream_proto_init() }
