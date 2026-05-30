@@ -2,13 +2,13 @@ package buffer
 
 import (
 	"time"
+
+	"golang-project.local/internal/types"
 )
 
-// Metric represents a generic metric with timestamp and value
-type Metric interface {
-	Timestamp() time.Time
-	Value() interface{}
-}
+// Metric is an alias for types.Metric for backward compatibility.
+// New code should use types.Metric directly.
+type Metric = types.Metric
 
 // MetricBuffer defines the interface for thread-safe circular buffer operations
 type MetricBuffer interface {

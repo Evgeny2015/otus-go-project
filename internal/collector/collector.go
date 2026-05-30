@@ -1,6 +1,5 @@
 // Package collector provides platform-specific system metric collectors
-// that execute shell commands and parse their output to fill LoadMetric,
-// CpuMetric, and DiskIOMetric structures.
+// that execute shell commands and parse their output to fill metric structures.
 package collector
 
 import (
@@ -9,37 +8,9 @@ import (
 	"runtime"
 	"time"
 
-	"golang-project.local/internal/buffer"
+	"golang-project.local/internal/types"
 	pb "golang-project.local/proto"
 )
-
-// LoadMetric wraps proto.LoadMetrics to implement buffer.Metric
-type LoadMetric struct {
-	ts      time.Time
-	Metrics *pb.LoadMetrics
-}
-
-func (m *LoadMetric) Timestamp() time.Time {
-	return m.ts
-}
-
-func (m *LoadMetric) Value() interface{} {
-	return m.Metrics
-}
-
-// CpuMetric wraps proto.CpuMetrics to implement buffer.Metric
-type CpuMetric struct {
-	ts      time.Time
-	Metrics *pb.CpuMetrics
-}
-
-func (m *CpuMetric) Timestamp() time.Time {
-	return m.ts
-}
-
-func (m *CpuMetric) Value() interface{} {
-	return m.Metrics
-}
 
 // LoadCollector collects system load average metrics.
 type LoadCollector struct {
@@ -82,25 +53,21 @@ func (c *CpuCollector) Enabled() bool {
 }
 
 // Collect collects load metrics using the platform-specific command.
-func (c *LoadCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+func (c *LoadCollector) Collect(ctx context.Context) (types.Metric, error) {
 	load, err := collectLoad(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("load collection failed: %w", err)
 	}
-	return &LoadMetric{
-		Metrics: load,
-	}, nil
+	return types.NewLoadMetric(time.Now(), load), nil
 }
 
 // Collect collects CPU metrics using the platform-specific command.
-func (c *CpuCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+func (c *CpuCollector) Collect(ctx context.Context) (types.Metric, error) {
 	cpu, err := collectCPU(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("cpu collection failed: %w", err)
 	}
-	return &CpuMetric{
-		Metrics: cpu,
-	}, nil
+	return types.NewCpuMetric(time.Now(), cpu), nil
 }
 
 // collectLoad dispatches to the platform-specific implementation.
@@ -131,20 +98,6 @@ func collectCPU(ctx context.Context) (*pb.CpuMetrics, error) {
 	}
 }
 
-// DiskIOMetric wraps proto.DiskIOMetrics to implement buffer.Metric
-type DiskIOMetric struct {
-	ts      time.Time
-	Metrics *pb.DiskIOMetrics
-}
-
-func (m *DiskIOMetric) Timestamp() time.Time {
-	return m.ts
-}
-
-func (m *DiskIOMetric) Value() interface{} {
-	return m.Metrics
-}
-
 // DiskIOCollector collects disk I/O metrics.
 type DiskIOCollector struct {
 	enabled bool
@@ -166,14 +119,12 @@ func (c *DiskIOCollector) Enabled() bool {
 }
 
 // Collect collects disk I/O metrics using the platform-specific command.
-func (c *DiskIOCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+func (c *DiskIOCollector) Collect(ctx context.Context) (types.Metric, error) {
 	diskio, err := collectDiskIO(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("disk I/O collection failed: %w", err)
 	}
-	return &DiskIOMetric{
-		Metrics: diskio,
-	}, nil
+	return types.NewDiskIOMetric(time.Now(), diskio), nil
 }
 
 // collectDiskIO dispatches to the platform-specific implementation.
@@ -188,20 +139,6 @@ func collectDiskIO(ctx context.Context) (*pb.DiskIOMetrics, error) {
 	default:
 		return nil, fmt.Errorf("unsupported platform: %s", runtime.GOOS)
 	}
-}
-
-// FilesystemUsageMetric wraps proto.FilesystemUsage to implement buffer.Metric
-type FilesystemUsageMetric struct {
-	ts      time.Time
-	Metrics *pb.FilesystemUsage
-}
-
-func (m *FilesystemUsageMetric) Timestamp() time.Time {
-	return m.ts
-}
-
-func (m *FilesystemUsageMetric) Value() interface{} {
-	return m.Metrics
 }
 
 // FilesystemUsageCollector collects filesystem usage metrics.
@@ -225,14 +162,12 @@ func (c *FilesystemUsageCollector) Enabled() bool {
 }
 
 // Collect collects filesystem usage metrics using the platform-specific command.
-func (c *FilesystemUsageCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+func (c *FilesystemUsageCollector) Collect(ctx context.Context) (types.Metric, error) {
 	fs, err := collectFilesystemUsage(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("filesystem usage collection failed: %w", err)
 	}
-	return &FilesystemUsageMetric{
-		Metrics: fs,
-	}, nil
+	return types.NewFilesystemUsageMetric(time.Now(), fs), nil
 }
 
 // collectFilesystemUsage dispatches to the platform-specific implementation.
@@ -252,20 +187,6 @@ func collectFilesystemUsage(ctx context.Context) (*pb.FilesystemUsage, error) {
 // ---------------------------------------------------------------------------
 // NetworkMetrics
 // ---------------------------------------------------------------------------
-
-// NetworkMetric wraps proto.NetworkMetrics to implement buffer.Metric
-type NetworkMetric struct {
-	ts      time.Time
-	Metrics *pb.NetworkMetrics
-}
-
-func (m *NetworkMetric) Timestamp() time.Time {
-	return m.ts
-}
-
-func (m *NetworkMetric) Value() interface{} {
-	return m.Metrics
-}
 
 // NetworkCollector collects network connection statistics.
 type NetworkCollector struct {
@@ -288,14 +209,12 @@ func (c *NetworkCollector) Enabled() bool {
 }
 
 // Collect collects network metrics using the platform-specific command.
-func (c *NetworkCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+func (c *NetworkCollector) Collect(ctx context.Context) (types.Metric, error) {
 	net, err := collectNetworkMetrics(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("network metrics collection failed: %w", err)
 	}
-	return &NetworkMetric{
-		Metrics: net,
-	}, nil
+	return types.NewNetworkMetric(time.Now(), net), nil
 }
 
 // collectNetworkMetrics dispatches to the platform-specific implementation.
@@ -315,20 +234,6 @@ func collectNetworkMetrics(ctx context.Context) (*pb.NetworkMetrics, error) {
 // ---------------------------------------------------------------------------
 // TopTalkers
 // ---------------------------------------------------------------------------
-
-// TopTalkersMetric wraps proto.TopTalkers to implement buffer.Metric
-type TopTalkersMetric struct {
-	ts      time.Time
-	Metrics *pb.TopTalkers
-}
-
-func (m *TopTalkersMetric) Timestamp() time.Time {
-	return m.ts
-}
-
-func (m *TopTalkersMetric) Value() interface{} {
-	return m.Metrics
-}
 
 // TopTalkersCollector collects network top talkers data.
 type TopTalkersCollector struct {
@@ -351,14 +256,12 @@ func (c *TopTalkersCollector) Enabled() bool {
 }
 
 // Collect collects top talkers data using the platform-specific command.
-func (c *TopTalkersCollector) Collect(ctx context.Context) (buffer.Metric, error) {
+func (c *TopTalkersCollector) Collect(ctx context.Context) (types.Metric, error) {
 	tt, err := collectTopTalkers(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("top talkers collection failed: %w", err)
 	}
-	return &TopTalkersMetric{
-		Metrics: tt,
-	}, nil
+	return types.NewTopTalkersMetric(time.Now(), tt), nil
 }
 
 // collectTopTalkers dispatches to the platform-specific implementation.

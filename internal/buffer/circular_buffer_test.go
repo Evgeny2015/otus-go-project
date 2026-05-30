@@ -3,13 +3,19 @@ package buffer
 import (
 	"testing"
 	"time"
+
+	"golang-project.local/internal/types"
 )
 
-// mockMetric implements the Metric interface for testing
+// mockMetric implements the types.Metric interface for testing
 type mockMetric struct {
 	metricType string
 	timestamp  time.Time
 	value      interface{}
+}
+
+func (m mockMetric) Type() types.MetricType {
+	return types.MetricType(m.metricType)
 }
 
 func (m mockMetric) Timestamp() time.Time {
@@ -18,6 +24,10 @@ func (m mockMetric) Timestamp() time.Time {
 
 func (m mockMetric) Value() interface{} {
 	return m.value
+}
+
+func (m mockMetric) Merge(other types.Metric) types.Metric {
+	return m
 }
 
 func TestNewCircularBuffer(t *testing.T) {
